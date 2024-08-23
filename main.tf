@@ -138,6 +138,6 @@ resource "aws_network_interface" "this" {
 }
 
 output "ip_address" {
-  description = "The public IP of the instane"
+  description = "The public IP of the instance"
   value       = try(module.ec2_instance.public_ip)
 }
