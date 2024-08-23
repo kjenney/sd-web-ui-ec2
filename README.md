@@ -1,4 +1,4 @@
-# ec2 
+# sd-web-ui-ec2
 
 Run Stable Diffusion models on an EC2 instance
 
