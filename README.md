@@ -66,3 +66,5 @@ pip3 install --upgrade pip
 pip3 install packaging
 ./webui.sh --xformers --share --listen
 ```
+
+Wait for the models to download and the script to finish.
