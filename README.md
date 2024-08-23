@@ -14,12 +14,19 @@ Get the IP address of the EC2 instance:
 EC2IP=$(terraform output ip_address)
 ```
 
+SSH to the instance:
+
+```
 ssh -i ~/.ssh/ec2.pem ec2-user@$EC2IP
+```
 
 ## Steps to get working on the instance
 
-### Install Grid Driver
-### https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-nvidia-driver.html#nvidia-GRID-driver
+### Install Grid Driver 
+
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-nvidia-driver.html#nvidia-GRID-driver
+
+```
 sudo yum install -y gcc make
 sudo yum update -y
 sudo reboot
@@ -31,8 +38,11 @@ nvidia-smi -q | head
 sudo touch /etc/modprobe.d/nvidia.conf
 echo "options nvidia NVreg_EnableGpuFirmware=0" | sudo tee --append /etc/modprobe.d/nvidia.conf
 sudo reboot
+```
 
 ### Install Python 3.10
+
+```
 sudo yum -y update
 sudo yum -y groupinstall "Development Tools"
 sudo yum remove -y openssl openssl-devel xz-devel sqlite-devel
@@ -43,8 +53,11 @@ cd Python-3.10.0
 sed -i 's/PKG_CONFIG openssl /PKG_CONFIG openssl11 /g' configure
 sudo ./configure --enable-optimizations
 sudo make altinstall
+```
 
 ### Install webui
+
+```
 sudo yum install -y wget git gperftools-libs libglvnd-glx 
 wget https://raw.githubusercontent.com/AUTOMATIC1111/stable-diffusion-webui/master/webui.sh
 chmod +x webui.sh
@@ -52,3 +65,4 @@ set use_venv to 0 for package issue
 pip3 install --upgrade pip
 pip3 install packaging
 ./webui.sh --xformers --share --listen
+```
