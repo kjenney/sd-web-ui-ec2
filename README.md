@@ -66,12 +66,17 @@ chmod +x webui.sh
 set use_venv to 0 for package issue
 pip3 install --upgrade pip
 pip3 install packaging
-./webui.sh --xformers --share --listen
+./webui.sh --xformers --share --listen --enable-insecure-extension-access
 ```
 
 ## Using the Stable Diffusion WebUI
 
 Open the Gradio URL that is provided in the script. This is the web UI that you just installed!
+
+Install extensions using the UI:
+
+https://github.com/Mikubill/sd-webui-controlnet
+
 
 
 ## Cleaning up 
