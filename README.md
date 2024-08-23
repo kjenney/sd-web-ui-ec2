@@ -1,5 +1,8 @@
 # sd-web-ui-ec2
 
+
+## Getting Started
+
 Run Stable Diffusion models on an EC2 instance
 
 ```
@@ -68,3 +71,10 @@ pip3 install packaging
 ```
 
 Wait for the models to download and the script to finish.
+
+
+## Cleaning up 
+
+```
+terraform destroy 
+```
