@@ -70,7 +70,9 @@ pip3 install packaging
 ./webui.sh --xformers --share --listen
 ```
 
-Wait for the models to download and the script to finish.
+## Using the Stable Diffusion WebUI
+
+Open the Gradio URL that is provided in the script. This is the web UI that you just installed!
 
 
 ## Cleaning up 
