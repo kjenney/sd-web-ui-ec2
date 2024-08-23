@@ -1,9 +1,8 @@
 # sd-web-ui-ec2
 
+Run Stable Diffusion WebUI on an EC2 instance
 
 ## Getting Started
-
-Run Stable Diffusion models on an EC2 instance
 
 ```
 MYIP=$(curl ifconfig.me)
