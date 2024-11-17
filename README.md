@@ -54,6 +54,7 @@ tar xzf Python-3.10.0.tgz
 cd Python-3.10.0
 sed -i 's/PKG_CONFIG openssl /PKG_CONFIG openssl11 /g' configure
 sudo ./configure --enable-optimizations
+sudo yum install -y lzma xz-devel
 sudo make altinstall
 ```
 
@@ -79,7 +80,11 @@ https://github.com/Mikubill/sd-webui-controlnet
 
 ## Using ComfyUI
 
-You can deploy ComfyUI in much the same way on the EC2 instance. More to come...
+You can deploy ComfyUI in much the same way on the EC2 instance.
+
+You may need to run: `pip3.10 install pylzma`.
+
+To start: `python3.10 main.py --listen 0.0.0.0`
 
 
 
