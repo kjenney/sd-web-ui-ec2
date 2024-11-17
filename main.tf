@@ -2,6 +2,10 @@ variable "my_ip" {
   type = string
 }
 
+variable "custom_ami" {
+  type = string
+}
+
 provider "aws" {
   region = local.region
 }
@@ -43,7 +47,7 @@ module "ec2_instance" {
     AdministratorAccess       = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
   }
 
-  ami                         = data.aws_ami.amazon_linux_2.id
+  ami                         = var.custom_ami != "" ? var.custom_ami : data.aws_ami.amazon_linux_2.id
   associate_public_ip_address = true
   instance_type               = "g4dn.xlarge"
   key_name                    = "ec2"
