@@ -13,7 +13,7 @@ terraform apply -var="my_ip=$MYIP/32"
 Get the IP address of the EC2 instance: 
 
 ```
-EC2IP=$(terraform output ip_address)
+EC2IP=$(terraform output -raw ip_address)
 ```
 
 SSH to the instance:
