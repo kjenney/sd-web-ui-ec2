@@ -2,12 +2,21 @@
 
 Run Stable Diffusion WebUI on an EC2 instance
 
-## Getting Started
+## Quick Start
 
 ```
 MYIP=$(curl ifconfig.me)
 terraform init
 terraform apply -var="my_ip=$MYIP/32"
+```
+
+## Quick Start with a custom AMI (skipping some steps)
+
+```
+MYIP=$(curl ifconfig.me)
+MYAMI="SOMEAMITHATYOUHAVE" # change this value
+terraform init
+terraform apply -var="my_ip=$MYIP/32" -var="custom_ami=$MYAMI"
 ```
 
 Get the IP address of the EC2 instance: 
