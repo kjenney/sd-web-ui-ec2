@@ -77,6 +77,10 @@ Install extensions using the UI:
 
 https://github.com/Mikubill/sd-webui-controlnet
 
+## Using ComfyUI
+
+You can deploy ComfyUI in much the same way on the EC2 instance. More to come...
+
 
 
 ## Cleaning up 
