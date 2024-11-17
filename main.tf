@@ -122,7 +122,14 @@ module "security_group" {
       protocol    = "tcp"
       description = "SSH"
       cidr_blocks = var.my_ip
-    },    
+    },
+    {
+      from_port   = 8188
+      to_port     = 8188
+      protocol    = "tcp"
+      description = "ComfyUI"
+      cidr_blocks = var.my_ip
+    }
   ]
   egress_rules        = ["all-all"]
 
