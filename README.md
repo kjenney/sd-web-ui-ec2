@@ -1,35 +1,26 @@
 # sd-web-ui-ec2
 
-Run Stable Diffusion WebUI on an EC2 instance
+Run Stable Diffusion WebUI on an EC2 instance. Connect to the EC2 instance using Systems Manager Session Manager.
 
 ## Quick Start
 
 ```
-MYIP=$(curl ifconfig.me)
 terraform init
-terraform apply -var="my_ip=$MYIP/32"
+terraform apply
 ```
 
-## Quick Start with a custom AMI (skipping some steps)
+## Quick Start with a custom AMI (skipping some steps) and custom instance type
 
 ```
-MYIP=$(curl ifconfig.me)
-MYAMI="SOMEAMITHATYOUHAVE" # change this value
+INSTANCE_TYPE="g4dn.2xlarge"
+MYAMI="SOMEAMI" # change this value to the name of an AMI - can be regex
 terraform init
-terraform apply -var="my_ip=$MYIP/32" -var="custom_ami=$MYAMI"
+terraform apply -var="ami_lookup=$MYAMI" -var="instance_type=$INSTANCE_TYPE"
 ```
 
-Get the IP address of the EC2 instance: 
+## Connecting to the instance
 
-```
-EC2IP=$(terraform output -raw ip_address)
-```
-
-SSH to the instance:
-
-```
-ssh -i ~/.ssh/ec2.pem ec2-user@$EC2IP
-```
+Use Session Manager to connect to the instance: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-with-systems-manager-session-manager.html 
 
 ## Steps to get working on the instance
 
@@ -94,8 +85,6 @@ You can deploy ComfyUI in much the same way on the EC2 instance.
 You may need to run: `pip3.10 install pylzma`.
 
 To start: `python3.10 main.py --listen 0.0.0.0`
-
-
 
 ## Cleaning up 
 
