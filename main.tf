@@ -1,9 +1,12 @@
-variable "my_ip" {
+# Lookup using the AMI Name - not the AMI ID
+variable "ami_lookup" {
   type = string
+  default = "amzn2-ami-kernel-5.10-hvm-2.0.20241113.1-x86_64-gp2"
 }
 
-variable "custom_ami" {
+variable "instance_type" {
   type = string
+  default = "g4dn.xlarge"
 }
 
 provider "aws" {
@@ -45,11 +48,13 @@ module "ec2_instance" {
   iam_role_description        = "IAM role for EC2 instance"
   iam_role_policies = {
     AdministratorAccess       = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+    AmazonSSMReadOnlyAccess   = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
+    AmazonEC2ReadOnlyAccess   = "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
   }
 
-  ami                         = var.custom_ami != "" ? var.custom_ami : data.aws_ami.amazon_linux_2.id
-  associate_public_ip_address = true
-  instance_type               = "g4dn.xlarge"
+  ami                         = data.aws_ami.ami.id
+  associate_public_ip_address = false
+  instance_type               = var.instance_type
   key_name                    = "ec2"
   monitoring                  = false
   vpc_security_group_ids      = [module.security_group.security_group_id]
@@ -70,6 +75,8 @@ module "ec2_instance" {
     Terraform   = "true"
     Environment = "dev"
   }
+
+  depends_on = [module.vpc_endpoints.endpoints]
 }
 
 ################################################################################
@@ -83,6 +90,8 @@ module "vpc" {
   name = local.name
   cidr = local.vpc_cidr
 
+  enable_nat_gateway = true
+
   azs             = local.azs
   private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 4, k)]
   public_subnets  = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 48)]
@@ -90,13 +99,13 @@ module "vpc" {
   tags = local.tags
 }
 
-data "aws_ami" "amazon_linux_2" {
+data "aws_ami" "ami" {
   most_recent = true
-  owners      = ["amazon"]
+  owners      = ["amazon", "self"]
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-kernel-5.10-hvm-2.0.20240131.0-x86_64-gp2"]
+    values = [var.ami_lookup]
   }
 }
 
@@ -108,30 +117,9 @@ module "security_group" {
   description = "Security group for example usage with EC2 instance"
   vpc_id      = module.vpc.vpc_id
 
-  ingress_with_cidr_blocks = [
-    {
-      from_port   = 7860
-      to_port     = 7860
-      protocol    = "tcp"
-      description = "SD UI port"
-      cidr_blocks = var.my_ip
-    },
-    {
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      description = "SSH"
-      cidr_blocks = var.my_ip
-    },
-    {
-      from_port   = 8188
-      to_port     = 8188
-      protocol    = "tcp"
-      description = "ComfyUI"
-      cidr_blocks = var.my_ip
-    }
-  ]
-  egress_rules        = ["all-all"]
+  ingress_cidr_blocks       = ["10.0.0.0/16"]
+  ingress_rules             = ["https-443-tcp"]
+  egress_rules              = ["all-all"]
 
   tags = local.tags
 }
@@ -171,16 +159,35 @@ module "vpc_endpoints" {
         private_dns_only_for_inbound_resolver_endpoint = false
       }
       tags = { Name = "s3-vpc-endpoint" }
-    }
+    },
+    ssm = {
+      service             = "ssm"
+      private_dns_enabled = true
+      dns_options = {
+        private_dns_only_for_inbound_resolver_endpoint = false
+      }
+      tags = { Name = "ssm-vpc-endpoint" }      
+    },
+    ssmmessages = {
+      service             = "ssmmessages"
+      private_dns_enabled = true
+      dns_options = {
+        private_dns_only_for_inbound_resolver_endpoint = false
+      }
+      tags = { Name = "ssmmessages-vpc-endpoint" }      
+    },   
+    ec2messages = {
+      service             = "ec2messages"
+      private_dns_enabled = true
+      dns_options = {
+        private_dns_only_for_inbound_resolver_endpoint = false
+      }
+      tags = { Name = "ec2messages-vpc-endpoint" }      
+    },
   }
 
   tags = merge(local.tags, {
     Project  = "Secret"
     Endpoint = "true"
   })
-}
-
-output "ip_address" {
-  description = "The public IP of the instance"
-  value       = try(module.ec2_instance.public_ip)
 }
