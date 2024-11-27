@@ -49,7 +49,7 @@ module "ec2_instance" {
 
   ami                         = var.custom_ami != "" ? var.custom_ami : data.aws_ami.amazon_linux_2.id
   associate_public_ip_address = true
-  instance_type               = "g4dn.xlarge"
+  instance_type               = "g6e.4xlarge"
   key_name                    = "ec2"
   monitoring                  = false
   vpc_security_group_ids      = [module.security_group.security_group_id]
