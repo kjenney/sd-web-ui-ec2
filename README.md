@@ -35,6 +35,8 @@ ssh -i ~/.ssh/ec2.pem ec2-user@$EC2IP
 
 ### Install Grid Driver 
 
+AL2
+
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-nvidia-driver.html#nvidia-GRID-driver
 
 ```
@@ -44,12 +46,66 @@ sudo reboot
 sudo yum install -y kernel-devel-$(uname -r)
 aws s3 cp --recursive s3://ec2-linux-nvidia-drivers/latest/ .
 chmod +x NVIDIA-Linux-x86_64*.run
+# AL2023 /usr/bin/gcc (not 10-cc)
 sudo CC=/usr/bin/gcc10-cc ./NVIDIA-Linux-x86_64*.run --accept-license
 nvidia-smi -q | head
 sudo touch /etc/modprobe.d/nvidia.conf
 echo "options nvidia NVreg_EnableGpuFirmware=0" | sudo tee --append /etc/modprobe.d/nvidia.conf
 sudo reboot
 ```
+
+AL2023
+
+https://repost.aws/articles/ARwfQMxiC-QMOgWykD9mco1w/how-do-i-install-nvidia-gpu-driver-cuda-toolkit-and-optionally-nvidia-container-toolkit-in-amazon-linux-2023-al2023
+
+```
+sudo dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/amzn2023/x86_64/cuda-amzn2023.repo
+sudo dnf module install -y nvidia-driver:latest-dkms
+sudo dnf install -y cuda-toolkit
+sudo reboot
+```
+
+Docker in AL2023 for pinning
+
+```
+#!/bin/bash
+dnf check-release-update
+sudo dnf update -y
+sudo dnf install -y dkms kernel-devel kernel-modules-extra
+sudo systemctl enable dkms
+
+cd /tmp
+if (arch | grep -q x86); then
+  sudo dnf install -y nvidia-release
+  sudo dnf install -y nvidia-driver
+  sudo dnf install -y cuda-toolkit
+else
+  sudo dnf install -y vulkan-devel libglvnd-devel elfutils-libelf-devel xorg-x11-server-Xorg
+  curl -L -O https://developer.download.nvidia.com/compute/cuda/12.6.3/local_installers/cuda_12.6.3_560.35.05_linux_sbsa.run
+  chmod +x ./cuda*.run
+  sudo ./cuda_*.run --driver --toolkit --tmpdir=/var/tmp --silent
+fi
+
+if (! dnf search nvidia | grep -q nvidia-container-toolkit); then
+  sudo dnf config-manager --add-repo https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo
+fi
+sudo dnf install -y nvidia-container-toolkit
+
+sudo dnf install -y docker
+sudo systemctl enable docker
+sudo usermod -aG docker ec2-user
+sudo usermod -aG docker ssm-user
+
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+
+sudo reboot
+```
+
+ami-0453ec754f44f9a4a
+
+[root@ip-10-0-3-113 ~]# docker run -it --rm --runtime=nvidia --gpus all -v /tmp/snapshot.yaml:/snapshot.yaml ghcr.io/kjenney/cm-pkg:v0.11
+
 
 ### Install Python 3.10
 
